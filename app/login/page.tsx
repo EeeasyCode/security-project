@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -14,12 +13,12 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Vulnerable login implementation
-    if (email === "admin@example.com" && password === "password") {
-      alert("Login successful");
-      router.push("/");
+    // 임시 로그인 처리
+    if (email && password) {
+      localStorage.setItem("isLoggedIn", "true");
+      router.push("/mypage");
     } else {
-      alert("Login failed");
+      alert("이메일과 비밀번호를 입력해주세요.");
     }
   };
 
@@ -28,7 +27,7 @@ export default function LoginPage() {
       <main className="max-w-md mx-auto mt-8 px-6 py-8">
         <Card>
           <CardContent className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Login</h2>
+            <h2 className="text-2xl font-bold mb-6">로그인</h2>
             <form onSubmit={handleLogin}>
               <div className="space-y-4">
                 <div>
@@ -36,7 +35,7 @@ export default function LoginPage() {
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Email
+                    이메일
                   </label>
                   <Input
                     type="email"
@@ -51,7 +50,7 @@ export default function LoginPage() {
                     htmlFor="password"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Password
+                    비밀번호
                   </label>
                   <Input
                     type="password"
@@ -62,19 +61,10 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full">
-                  Login
+                  로그인
                 </Button>
               </div>
             </form>
-            <p className="mt-4 text-center text-sm text-gray-600">
-              Don't have an account?{" "}
-              <Link
-                href="/register"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                Register
-              </Link>
-            </p>
           </CardContent>
         </Card>
       </main>
