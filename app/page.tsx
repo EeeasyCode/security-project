@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Menu, ShoppingCart, User } from "lucide-react";
+import { Search, X, Menu, ShoppingCart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,7 +32,7 @@ const products = [
 export default function Home() {
   const [searchValue, setSearchValue] = useState("");
   const [activeTab, setActiveTab] = useState("new");
-  const [isLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
   // Vulnerable search implementation - allows SQL injection
@@ -125,6 +125,19 @@ export default function Home() {
                   className="hover:bg-gray-100"
                 >
                   <ShoppingCart className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (isLoggedIn) {
+                      setIsLoggedIn(false);
+                      router.push("/");
+                    } else {
+                      router.push("/login");
+                    }
+                  }}
+                >
+                  {isLoggedIn ? "Logout" : "Login"}
                 </Button>
                 <Button
                   variant="ghost"

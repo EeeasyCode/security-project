@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface UserData {
   name: string;
@@ -24,7 +25,7 @@ export default function MyPage() {
         name: "John Doe",
         email: "john@example.com",
         address: "123 Vulnerable St, Insecure City, 12345",
-        customInfo: "Sample user information",
+        customInfo: '<script>alert("XSS vulnerability")</script>',
       };
       setUserData(data);
     };
@@ -59,6 +60,12 @@ export default function MyPage() {
             <Button onClick={() => router.push("/")} className="mt-4">
               Logout
             </Button>
+            <Link
+              href="/"
+              className="text-blue-600 hover:text-blue-500 mt-4 inline-block"
+            >
+              Return to Home
+            </Link>
           </CardContent>
         </Card>
       </main>

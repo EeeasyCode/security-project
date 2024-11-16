@@ -7,25 +7,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [address, setAddress] = useState("");
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    // Vulnerable login implementation
-    if (email === "admin@example.com" && password === "password") {
-      alert("Login successful");
-      router.push("/");
-    } else {
-      alert("Login failed");
-    }
-  };
-
-  const handleForgotPassword = () => {
-    // Vulnerable password reset implementation
-    alert(`Password reset link sent to ${email}`);
+    // Vulnerable registration implementation
+    console.log(`Registering user: ${name}, ${email}, ${password}, ${address}`);
+    alert("Registration successful");
+    router.push("/login");
   };
 
   return (
@@ -33,9 +27,24 @@ export default function LoginPage() {
       <main className="max-w-md mx-auto mt-8 px-6 py-8">
         <Card>
           <CardContent className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Login</h2>
-            <form onSubmit={handleLogin}>
+            <h2 className="text-2xl font-bold mb-6">Register</h2>
+            <form onSubmit={handleRegister}>
               <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Name
+                  </label>
+                  <Input
+                    type="text"
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
                 <div>
                   <label
                     htmlFor="email"
@@ -66,26 +75,33 @@ export default function LoginPage() {
                     required
                   />
                 </div>
+                <div>
+                  <label
+                    htmlFor="address"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Address
+                  </label>
+                  <Input
+                    type="text"
+                    id="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
+                  />
+                </div>
                 <Button type="submit" className="w-full">
-                  Login
+                  Register
                 </Button>
               </div>
             </form>
-            <div className="mt-4 text-center">
-              <button
-                onClick={handleForgotPassword}
-                className="text-sm text-blue-600 hover:text-blue-500"
-              >
-                Forgot Password?
-              </button>
-            </div>
             <p className="mt-4 text-center text-sm text-gray-600">
-              Dont have an account?{" "}
+              Already have an account?{" "}
               <Link
-                href="/register"
+                href="/login"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
-                Register
+                Login
               </Link>
             </p>
           </CardContent>
