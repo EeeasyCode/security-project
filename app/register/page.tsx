@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -13,13 +14,16 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [address, setAddress] = useState("");
   const router = useRouter();
+  const { register } = useAuth();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Vulnerable registration implementation
-    console.log(`Registering user: ${name}, ${email}, ${password}, ${address}`);
-    alert("Registration successful");
-    router.push("/login");
+    try {
+      await register(name, email, password, address);
+      router.push("/");
+    } catch (error) {
+      alert(`Registration failed: ${error}`);
+    }
   };
 
   return (

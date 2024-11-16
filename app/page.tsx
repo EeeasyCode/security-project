@@ -1,55 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { Search, X, Menu, ShoppingCart, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Menu, ShoppingCart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./contexts/AuthContext";
+import type { Product } from "./api/products/route";
 
-// Intentionally vulnerable product data structure
-const products = [
-  {
-    id: 1,
-    name: "Product 1",
-    price: 100,
-    description: "<script>alert('XSS')</script>",
-  },
-  { id: 2, name: "Product 2", price: 200, description: "Description 2" },
-  { id: 3, name: "Product 3", price: 300, description: "Description 3" },
-  { id: 4, name: "Product 4", price: 400, description: "Description 4" },
-  { id: 5, name: "Product 5", price: 500, description: "Description 5" },
-  { id: 6, name: "Product 6", price: 600, description: "Description 6" },
-];
+const categories = ["All", "Top", "Bottom", "Jacket", "ACC"] as const;
 
 export default function Home() {
   const [searchValue, setSearchValue] = useState("");
-  const [activeTab, setActiveTab] = useState("new");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [selectedCategory, setSelectedCategory] =
+    useState<(typeof categories)[number]>("All");
   const router = useRouter();
+  const { user, logout } = useAuth();
+  const [products, setProducts] = useState<Product[]>([]);
 
-  // Vulnerable search implementation - allows SQL injection
-  const searchProducts = (value: string) => {
-    // Simulated vulnerable SQL query
-    const query = `SELECT * FROM products WHERE name LIKE '%${value}%'`;
-    console.log("Vulnerable query:", query);
-    return products;
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/products`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
   };
 
-  // Vulnerable direct HTML rendering
-  const renderDescription = (description: string) => {
-    return <div dangerouslySetInnerHTML={{ __html: description }} />;
-  };
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchValue.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All" || product.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const handleUserIconClick = () => {
-    if (isLoggedIn) {
+    if (user) {
       router.push("/mypage");
     } else {
       router.push("/login");
@@ -68,39 +68,17 @@ export default function Home() {
 
             {/* Navigation */}
             <nav className="hidden lg:flex items-center gap-8">
-              <DropdownMenu>
-                <DropdownMenuTrigger className="text-base font-medium hover:text-gray-600">
-                  Categories
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={() => eval('console.log("Vulnerable click")')}
-                  >
-                    Top
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>Bottom</DropdownMenuItem>
-                  <DropdownMenuItem>Jacket</DropdownMenuItem>
-                  <DropdownMenuItem>ACC</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Link
-                href="#"
-                className="text-base font-medium hover:text-gray-600"
-              >
-                New Arrivals
-              </Link>
-              <Link
-                href="#"
-                className="text-base font-medium hover:text-gray-600"
-              >
-                Sale
-              </Link>
-              <Link
-                href="#"
-                className="text-base font-medium hover:text-gray-600"
-              >
-                Contact
-              </Link>
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`text-base font-medium hover:text-gray-600 ${
+                    selectedCategory === category ? "text-primary" : ""
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
             </nav>
 
             {/* Search and Actions */}
@@ -126,19 +104,18 @@ export default function Home() {
                 >
                   <ShoppingCart className="h-5 w-5" />
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    if (isLoggedIn) {
-                      setIsLoggedIn(false);
-                      router.push("/");
-                    } else {
-                      router.push("/login");
-                    }
-                  }}
-                >
-                  {isLoggedIn ? "Logout" : "Login"}
-                </Button>
+                {user ? (
+                  <Button variant="outline" onClick={logout}>
+                    Logout
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push("/login")}
+                  >
+                    Login
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -171,36 +148,19 @@ export default function Home() {
       </div>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8 overflow-x-auto">
-          {["new", "popular", "cheap", "expensive"].map((tab) => (
-            <Button
-              key={tab}
-              variant={activeTab === tab ? "default" : "ghost"}
-              onClick={() => setActiveTab(tab)}
-              className="capitalize"
-            >
-              {tab}
-            </Button>
-          ))}
-        </div>
-
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {searchProducts(searchValue).map((product) => (
-            <Card key={product.id} className="overflow-hidden">
-              <div className="aspect-square bg-gray-100" />
-              <CardContent className="p-4">
-                {/* Vulnerable HTML rendering */}
-                <h3 className="text-lg font-semibold mb-2">
-                  {renderDescription(product.name)}
-                </h3>
-                <p className="text-lg mb-2">${product.price}</p>
-                <p className="text-gray-500 text-sm">
-                  {renderDescription(product.description)}
-                </p>
-              </CardContent>
-            </Card>
+          {filteredProducts.map((product) => (
+            <Link key={product.id} href={`/products/${product.id}`}>
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="aspect-square bg-gray-100" />
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
+                  <p className="text-lg mb-2">${product.price}</p>
+                  <p className="text-gray-500 text-sm">{product.description}</p>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </main>

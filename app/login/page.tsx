@@ -6,26 +6,26 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const { login } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Vulnerable login implementation
-    if (email === "admin@example.com" && password === "password") {
-      alert("Login successful");
+    try {
+      await login(email, password);
       router.push("/");
-    } else {
-      alert("Login failed");
+    } catch (error) {
+      alert(`Login failed: ${error}`);
     }
   };
 
   const handleForgotPassword = () => {
-    // Vulnerable password reset implementation
-    alert(`Password reset link sent to ${email}`);
+    alert(`Password reset functionality not implemented`);
   };
 
   return (
