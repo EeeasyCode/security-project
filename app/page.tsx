@@ -1,60 +1,64 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import { Search, Menu, ShoppingCart, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useAuth } from "./contexts/AuthContext";
-import type { Product } from "./api/products/route";
+import { useState, useEffect } from 'react'
+import { Search, Menu, ShoppingCart, User } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from './contexts/AuthContext'
 
-const categories = ["All", "Top", "Bottom", "Jacket", "ACC"] as const;
+const categories = ['All', 'Top', 'Bottom', 'Jacket', 'ACC'] as const
+
+type Product = {
+  id: number;
+  image: string;
+  name: string;
+  price: number;
+  description: string;
+  category: "Top" | "Bottom" | "Jacket" | "ACC";
+  sizes: string[];
+  colors: string[];
+};
 
 export default function Home() {
-  const [searchValue, setSearchValue] = useState("");
-  const [selectedCategory, setSelectedCategory] =
-    useState<(typeof categories)[number]>("All");
-  const router = useRouter();
-  const { user, logout } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
-
+  const [searchValue, setSearchValue] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<typeof categories[number]>('All')
+  const router = useRouter()
+  const { user, logout } = useAuth()
+  const [products, setProducts] = useState<Product[]>([])
+  
   const fetchProducts = async () => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/products`
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`)
       if (!response.ok) {
-        throw new Error("Failed to fetch products");
+        throw new Error('Failed to fetch products')
       }
-      const data = await response.json();
-      setProducts(data);
+      const data = await response.json()
+      setProducts(data)
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error('Error fetching products:', error)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchValue.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+    fetchProducts()
+  }, [])
+  
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchValue.toLowerCase())
+    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory
+    return matchesSearch && matchesCategory
+  })
 
   const handleUserIconClick = () => {
     if (user) {
-      router.push("/mypage");
+      router.push('/mypage')
     } else {
-      router.push("/login");
+      router.push('/login')
     }
-  };
+  }
 
   return (
     <div className="w-full">
@@ -73,7 +77,7 @@ export default function Home() {
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                   className={`text-base font-medium hover:text-gray-600 ${
-                    selectedCategory === category ? "text-primary" : ""
+                    selectedCategory === category ? 'text-primary' : ''
                   }`}
                 >
                   {category}
@@ -97,11 +101,8 @@ export default function Home() {
 
               {/* Actions */}
               <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-gray-100"
-                >
+                {/* Shopping Cart Button */}
+                <Button variant="ghost" size="icon" className="hover:bg-gray-100" onClick={() => router.push('/cart')}>
                   <ShoppingCart className="h-5 w-5" />
                 </Button>
                 {user ? (
@@ -109,19 +110,11 @@ export default function Home() {
                     Logout
                   </Button>
                 ) : (
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push("/login")}
-                  >
+                  <Button variant="outline" onClick={() => router.push('/login')}>
                     Login
                   </Button>
                 )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-gray-100"
-                  onClick={handleUserIconClick}
-                >
+                <Button variant="ghost" size="icon" className="hover:bg-gray-100" onClick={handleUserIconClick}>
                   <User className="h-5 w-5" />
                 </Button>
                 <Button variant="outline" size="icon" className="lg:hidden">
@@ -165,5 +158,5 @@ export default function Home() {
         </div>
       </main>
     </div>
-  );
+  )
 }

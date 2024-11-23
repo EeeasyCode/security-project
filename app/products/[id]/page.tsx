@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useCart } from '@/app/contexts/CartContext';
+import { toast } from 'sonner';
 
 type Product = {
   id: number;
@@ -36,6 +38,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -57,6 +60,13 @@ export default function ProductDetail() {
 
     fetchProduct();
   }, [params.id]);
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    addToCart(product, 1, selectedSize, selectedColor);
+    toast.success('Added to cart');
+  };
 
   if (!product) {
     return <div className="p-8 text-center">Loading...</div>;
@@ -127,7 +137,7 @@ export default function ProductDetail() {
               </Select>
             </div>
 
-            <Button className="w-full" size="lg">
+            <Button className="w-full" size="lg" onClick={handleAddToCart}>
               Add to Cart
             </Button>
           </div>
