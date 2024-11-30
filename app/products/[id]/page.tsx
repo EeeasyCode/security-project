@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import {
@@ -21,6 +21,8 @@ import { Badge } from "@/components/ui/badge"
 import { useCart } from '@/app/contexts/CartContext'
 import { toast } from 'sonner'
 import ProductReviews from '@/app/components/ProductReviews'
+// import WriteReviewForm from '@/app/components/WriteReviewForm' 제거
+import { useAuth } from '@/app/contexts/AuthContext'
 
 type Product = {
   id: number
@@ -39,7 +41,10 @@ export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState<string>("")
   const [selectedColor, setSelectedColor] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
+  // const [showReviewForm, setShowReviewForm] = useState(false) 제거
+
   const { addToCart } = useCart()
+  const { user } = useAuth()
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -47,9 +52,7 @@ export default function ProductDetail() {
       
       setIsLoading(true)
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/products/${params.id}`
-        )
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${params.id}`)
         if (!response.ok) {
           throw new Error('상품을 불러오는데 실패했습니다.')
         }
@@ -168,7 +171,25 @@ export default function ProductDetail() {
             </AccordionItem>
           </Accordion>
 
-          <ProductReviews productId={product.id} />
+          <ProductReviews productId={product.id} user={user} />
+
+          {/* 다음 코드 제거 */}
+          {/* {user && (
+            <Button 
+              className="w-full mt-4" 
+              variant="outline"
+              onClick={() => setShowReviewForm(true)}
+            >
+              리뷰 작성
+            </Button>
+          )}
+
+          {showReviewForm && (
+            <WriteReviewForm 
+              productId={product.id} 
+              onClose={() => setShowReviewForm(false)} 
+            />
+          )} */}
         </div>
       </div>
     </div>

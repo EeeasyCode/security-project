@@ -1,62 +1,56 @@
-"use client";
+'use client'
 
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from '../contexts/AuthContext'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from 'next/link'
+import { ShoppingBag, Star } from 'lucide-react'
 
 export default function MyPage() {
-  const { user, logout } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!user) {
-      router.push("/login");
-    }
-  }, [user, router]);
+  const { user } = useAuth()
 
   if (!user) {
-    return null;
+    return <div className="p-4">로그인이 필요합니다.</div>
   }
 
   return (
-    <div className="w-full">
-      <main className="max-w-2xl mx-auto mt-8 px-6 py-8">
+    <div className="max-w-4xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">마이페이지</h1>
+      
+      <div className="grid md:grid-cols-2 gap-6">
         <Card>
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold mb-6">My Page</h2>
-            <div>
-              <p>
-                <strong>Name:</strong> {user.name}
-              </p>
-              <p>
-                <strong>Email:</strong> {user.email}
-              </p>
-              {/* Vulnerable rendering of user data */}
-              {/* <div
-                dangerouslySetInnerHTML={{ __html: user.customInfo || "" }}
-              /> */}
-            </div>
-            <Button
-              onClick={() => {
-                logout();
-                router.push("/");
-              }}
-              className="mt-4"
-            >
-              Logout
-            </Button>
-            <Link
-              href="/"
-              className="text-blue-600 hover:text-blue-500 mt-4 inline-block ml-4"
-            >
-              Return to Home
+          <CardHeader>
+            <CardTitle>내 정보</CardTitle>
+            <CardDescription>회원 정보를 확인하고 수정할 수 있습니다.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-2">이름: {user.name}</p>
+            <p className="mb-4">이메일: {user.email}</p>
+            <Button variant="outline">정보 수정</Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>구매 내역 및 리뷰</CardTitle>
+            <CardDescription>구매한 상품을 확인하고 리뷰를 작성할 수 있습니다.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Link href="/purchase-history">
+              <Button className="w-full" variant="outline">
+                <ShoppingBag className="mr-2 h-4 w-4" />
+                구매 내역 보기
+              </Button>
+            </Link>
+            <Link href="/purchase-history">
+              <Button className="w-full" variant="outline">
+                <Star className="mr-2 h-4 w-4" />
+                리뷰 작성하기
+              </Button>
             </Link>
           </CardContent>
         </Card>
-      </main>
+      </div>
     </div>
-  );
+  )
 }

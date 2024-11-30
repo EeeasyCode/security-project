@@ -1,94 +1,93 @@
 'use client'
 
-import { Search, ShoppingCart, User } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '../contexts/AuthContext'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import Link from 'next/link'
-import { useRouter, usePathname } from 'next/navigation'
-import { useAuth } from '../contexts/AuthContext'
-
-const categories = ['All', 'Top', 'Bottom', 'Jacket', 'ACC'] as const
+import { ShoppingCart, User } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function Header() {
-  const router = useRouter()
-  const pathname = usePathname()
   const { user, logout } = useAuth()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    logout()
+    router.push('/login')
+  }
 
   return (
-    <header className="border-b bg-white">
-      <div className="max-w-7xl mx-auto px-6">
+    <header className="border-b">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="text-xl font-bold">
-            Project shop
-          </Link>
-
-          {/* Navigation */}
-          <nav className="flex items-center gap-8 mx-12">
-            {categories.map((category) => (
-              <Link
-                key={category}
-                href={category === 'All' ? '/' : `/category/${category.toLowerCase()}`}
-                className={`text-base hover:text-gray-600 transition-colors ${
-                  (category === 'All' && pathname === '/') ||
-                  pathname === `/category/${category.toLowerCase()}`
-                    ? 'text-primary font-medium'
-                    : 'text-gray-600'
-                }`}
-              >
-                {category}
+          <div className="flex items-center gap-8">
+            <Link href="/" className="text-xl font-bold">
+              Project shop
+            </Link>
+            <nav className="hidden md:flex items-center gap-4">
+              <Link href="/" className="hover:text-primary">
+                All
               </Link>
-            ))}
-          </nav>
+              <Link href="/?category=Top" className="hover:text-primary">
+                Top
+              </Link>
+              <Link href="/?category=Bottom" className="hover:text-primary">
+                Bottom
+              </Link>
+              <Link href="/?category=Jacket" className="hover:text-primary">
+                Jacket
+              </Link>
+              <Link href="/?category=ACC" className="hover:text-primary">
+                ACC
+              </Link>
+            </nav>
+          </div>
 
-          {/* Search and Actions */}
-          <div className="flex items-center gap-6">
-            {/* Search */}
-            <div className="relative w-[300px]">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search..."
-                className="pl-9 pr-4 w-full border-gray-200"
-              />
+          <div className="flex items-center gap-4">
+            <div className="hidden md:block w-72">
+              <Input type="search" placeholder="Search..." className="w-full" />
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="hover:bg-gray-50"
-                onClick={() => router.push('/cart')}
-              >
-                <ShoppingCart className="h-5 w-5 text-gray-600" />
+            {user ? (
+              <>
+                <Link href="/cart">
+                  <Button variant="ghost" size="icon">
+                    <ShoppingCart className="h-5 w-5" />
+                  </Button>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href="/mypage">마이페이지</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/purchase-history">구매내역/리뷰</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/my-reviews">내 리뷰 히스토리</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                      로그아웃
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <Button onClick={() => router.push('/login')} variant="ghost">
+                로그인
               </Button>
-              {user ? (
-                <Button 
-                  variant="outline" 
-                  className="font-medium"
-                  onClick={logout}
-                >
-                  Logout
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline"
-                  className="font-medium"
-                  onClick={() => router.push('/login')}
-                >
-                  Sign in
-                </Button>
-              )}
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="hover:bg-gray-50"
-                onClick={() => router.push('/mypage')}
-              >
-                <User className="h-5 w-5 text-gray-600" />
-              </Button>
-            </div>
+            )}
           </div>
         </div>
       </div>

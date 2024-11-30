@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Star } from 'lucide-react'
 
 type Review = {
@@ -14,6 +15,7 @@ type Review = {
   rating: number
   comment: string
   createdAt: string
+  isPrivate: boolean
 }
 
 type ProductReviewsProps = {
@@ -22,51 +24,37 @@ type ProductReviewsProps = {
 
 export default function ProductReviews({ productId }: ProductReviewsProps) {
   const [reviews, setReviews] = useState<Review[]>([])
-  const [newReview, setNewReview] = useState({ rating: 0, comment: '' })
-  const [hasPurchased, setHasPurchased] = useState(false)
+  const [newReview, setNewReview] = useState({ rating: 0, comment: '', isPrivate: false })
+  const [canReview, setCanReview] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useAuth()
 
   const fetchReviews = useCallback(async () => {
+    if (!user) {
+      setIsLoading(false)
+      return
+    }
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews?productId=${productId}`)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews?productId=${productId}&userId=${user.id}`)
       if (response.ok) {
         const data = await response.json()
-        setReviews(data)
+        setReviews(data.reviews)
+        setCanReview(data.canReview)
       }
     } catch (error) {
       console.error('리뷰 불러오기 오류:', error)
-    }
-  }, [productId])
-
-  const checkPurchaseStatus = useCallback(async () => {
-    if (user) {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/purchases?userId=${user.id}&productId=${productId}`)
-
-        if (response.ok) {
-          const data = await response.json()
-          setHasPurchased(data.hasPurchased)
-        }
-      } catch (error) {
-        console.error('구매 상태 확인 오류:', error)
-      }
-    }
-  }, [user, productId])
-
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true)
-      await fetchReviews()
-      await checkPurchaseStatus()
+    } finally {
       setIsLoading(false)
     }
-    loadData()
-  }, [fetchReviews, checkPurchaseStatus])
+  }, [productId, user])
+
+  useEffect(() => {
+    fetchReviews()
+  }, [fetchReviews])
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user) return
+    if (!user || !canReview) return
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews`, {
@@ -77,13 +65,14 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
           userId: user.id,
           userName: user.name,
           rating: newReview.rating,
-          comment: newReview.comment
+          comment: newReview.comment,
+          isPrivate: newReview.isPrivate
         })
       })
 
       if (response.ok) {
         await fetchReviews()
-        setNewReview({ rating: 0, comment: '' })
+        setNewReview({ rating: 0, comment: '', isPrivate: false })
       }
     } catch (error) {
       console.error('리뷰 제출 오류:', error)
@@ -95,61 +84,81 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   }
 
   return (
-    <div className="mt-8">
-      <h2 className="text-2xl font-bold mb-4">리뷰</h2>
+    <div className="mt-8 space-y-4">
+      <h2 className="text-xl font-semibold">리뷰</h2>
       {reviews.length === 0 ? (
         <p>아직 리뷰가 없습니다.</p>
       ) : (
         reviews.map((review) => (
-          <div key={review.id} className="mb-4 p-4 border rounded-lg">
-            <div className="flex items-center mb-2">
-              <Avatar className="h-10 w-10 mr-2">
-                <AvatarFallback>{review.userName.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold">{review.userName}</p>
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${
-                        i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
+          <div key={review.id} className="p-4 border rounded-lg mb-4">
+            {(!review.isPrivate || review.userId === user?.id || user?.role === 'admin') && (
+              <div className="flex items-start gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarFallback>{review.userName.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold text-base">{review.userName}</h3>
+                  <div className="flex gap-1 my-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">{review.comment}</p>
+                  {review.isPrivate && (
+                    <span className="text-xs text-muted-foreground mt-1 block">비공개 리뷰</span>
+                  )}
                 </div>
               </div>
-            </div>
-            <p>{review.comment}</p>
+            )}
           </div>
         ))
       )}
 
-      {user && hasPurchased && (
-        <form onSubmit={handleSubmitReview} className="mt-4">
-          <h3 className="text-lg font-semibold mb-2">리뷰 작성</h3>
-          <div className="mb-2">
-            {[...Array(5)].map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setNewReview({ ...newReview, rating: i + 1 })}
+      {user && canReview && (
+        <form onSubmit={handleSubmitReview} className="border rounded-lg p-4 mt-6">
+          <h3 className="font-semibold text-base mb-4">리뷰 작성</h3>
+          <div className="mb-4">
+            <div className="flex gap-1 mb-2">
+              {[...Array(5)].map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setNewReview({ ...newReview, rating: i + 1 })}
+                >
+                  <Star
+                    className={`h-5 w-5 ${
+                      i < newReview.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            <Textarea
+              value={newReview.comment}
+              onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+              placeholder="리뷰를 작성해주세요..."
+              className="mb-4"
+            />
+            <div className="flex items-center space-x-2 mb-4">
+              <Checkbox
+                id="private"
+                checked={newReview.isPrivate}
+                onCheckedChange={(checked) => setNewReview({ ...newReview, isPrivate: checked as boolean })}
+              />
+              <label
+                htmlFor="private"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                <Star
-                  className={`h-6 w-6 ${
-                    i < newReview.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                  }`}
-                />
-              </button>
-            ))}
+                비공개
+              </label>
+            </div>
+            <Button type="submit" className="w-full">리뷰 작성하기</Button>
           </div>
-          <Textarea
-            value={newReview.comment}
-            onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-            placeholder="리뷰를 작성해주세요..."
-            className="mb-2"
-          />
-          <Button type="submit">리뷰 제출</Button>
         </form>
       )}
     </div>

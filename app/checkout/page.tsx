@@ -12,6 +12,10 @@ export default function CheckoutPage() {
   const { user } = useAuth()
   const router = useRouter()
   const [address, setAddress] = useState('')
+  const [cardNumber, setCardNumber] = useState('')
+  const [expiryDate, setExpiryDate] = useState('')
+  const [cvc, setCvc] = useState('')
+  const [cardPassword, setCardPassword] = useState('')
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,7 +33,11 @@ export default function CheckoutPage() {
           userId: user.id,
           items: items,
           total: total,
-          address: address
+          address: address,
+          cardNumber: cardNumber,
+          expiryDate: expiryDate,
+          cvc: cvc,
+          cardPassword: cardPassword
         })
       })
 
@@ -71,6 +79,43 @@ export default function CheckoutPage() {
             id="address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="cardNumber" className="block mb-2">카드 번호</label>
+          <Input
+            id="cardNumber"
+            value={cardNumber}
+            onChange={(e) => setCardNumber(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="expiryDate" className="block mb-2">만료 기간 (MM/YY)</label>
+          <Input
+            id="expiryDate"
+            value={expiryDate}
+            onChange={(e) => setExpiryDate(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="cvc" className="block mb-2">CVC 번호</label>
+          <Input
+            id="cvc"
+            value={cvc}
+            onChange={(e) => setCvc(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="cardPassword" className="block mb-2">카드 비밀번호</label>
+          <Input
+            id="cardPassword"
+            type="password"
+            value={cardPassword}
+            onChange={(e) => setCardPassword(e.target.value)}
             required
           />
         </div>
