@@ -27,7 +27,7 @@ export default function AdminCustomers() {
 
   const fetchCustomers = async () => {
     // 실제 API 호출로 대체해야 합니다
-    const response = await fetch('/api/admin/customers')
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/customers`)
     const data = await response.json()
     setCustomers(data)
   }

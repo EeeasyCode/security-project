@@ -9,7 +9,7 @@ type Order = {
   id: number
   userId: number
   userName: string
-  totalAmount: number
+  total: number
   status: string
   createdAt: string
 }
@@ -28,9 +28,9 @@ export default function AdminOrders() {
   }, [user, router])
 
   const fetchOrders = async () => {
-    // 실제 API 호출로 대체해야 합니다
-    const response = await fetch('/api/admin/orders')
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/orders`)
     const data = await response.json()
+    console.log(data)
     setOrders(data)
   }
 
@@ -58,7 +58,7 @@ export default function AdminOrders() {
               <TableCell>{order.id}</TableCell>
               <TableCell>{order.userId}</TableCell>
               <TableCell>{order.userName}</TableCell>
-              <TableCell>{order.totalAmount}</TableCell>
+              <TableCell>{order.total}</TableCell>
               <TableCell>{order.status}</TableCell>
               <TableCell>{new Date(order.createdAt).toLocaleString()}</TableCell>
             </TableRow>

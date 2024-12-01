@@ -33,7 +33,7 @@ export default function AdminQnA() {
 
   const fetchQnAs = async () => {
     // 실제 API 호출로 대체해야 합니다
-    const response = await fetch('/api/admin/qna')
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/qna`)
     const data = await response.json()
     setQnAs(data)
   }
@@ -43,7 +43,7 @@ export default function AdminQnA() {
     if (!selectedQnA) return
 
     // 실제 API 호출로 대체해야 합니다
-    await fetch(`/api/admin/qna/${selectedQnA.id}/answer`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/qna/${selectedQnA.id}/answer`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ answer })

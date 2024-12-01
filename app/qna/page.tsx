@@ -22,7 +22,7 @@ export default function UserQnA() {
 
   const fetchQnAs = useCallback(async () => {
     // 실제 API 호출로 대체해야 합니다
-    const response = await fetch(`/api/qna/user/${user?.id}`)
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/qna/user/${user?.id}`)
     const data = await response.json()
     setQnAs(data)
   }, [user?.id])
@@ -40,7 +40,7 @@ export default function UserQnA() {
     if (!user) return
 
     // 실제 API 호출로 대체해야 합니다
-    await fetch('/api/qna', {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/qna`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user.id, question: newQuestion })

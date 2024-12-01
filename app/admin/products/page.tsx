@@ -26,7 +26,6 @@ export default function AdminProducts() {
 
   useEffect(() => {
     if (user?.role !== 'admin') {
-      // Redirect non-admin users
       window.location.href = '/'
     } else {
       fetchProducts()
@@ -34,36 +33,43 @@ export default function AdminProducts() {
   }, [user])
 
   const fetchProducts = async () => {
-    // Implement API call to fetch products
-    // For now, we'll use dummy data
-    setProducts([
-      { id: 1, name: 'T-Shirt', price: 19.99, description: 'Comfortable cotton t-shirt', category: 'Top' },
-      { id: 2, name: 'Jeans', price: 49.99, description: 'Classic blue jeans', category: 'Bottom' },
-    ])
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/products`)
+    const data = await response.json()
+    setProducts(data)
   }
 
   const handleAddProduct = async () => {
-    // Implement API call to add a new product
-    console.log('Adding product:', newProduct)
-    // After successful addition, fetch products again
-    await fetchProducts()
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newProduct),
+    })
+    const addedProduct = await response.json()
+    setProducts((prev) => [...prev, addedProduct])
     setNewProduct({ name: '', price: 0, description: '', category: '' })
   }
 
   const handleEditProduct = async () => {
     if (!editingProduct) return
-    // Implement API call to edit the product
-    console.log('Editing product:', editingProduct)
-    // After successful edit, fetch products again
-    await fetchProducts()
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/products/${editingProduct.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(editingProduct),
+    })
+    const updatedProduct = await response.json()
+    setProducts((prev) => prev.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)))
     setEditingProduct(null)
   }
 
   const handleDeleteProduct = async (id: number) => {
-    // Implement API call to delete the product
-    console.log('Deleting product with id:', id)
-    // After successful deletion, fetch products again
-    await fetchProducts()
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/products/${id}`, {
+      method: 'DELETE',
+    })
+    setProducts((prev) => prev.filter((product) => product.id !== id))
   }
 
   if (user?.role !== 'admin') {
@@ -84,9 +90,7 @@ export default function AdminProducts() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                이름
-              </Label>
+              <Label htmlFor="name" className="text-right">이름</Label>
               <Input
                 id="name"
                 value={newProduct.name}
@@ -95,9 +99,7 @@ export default function AdminProducts() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="price" className="text-right">
-                가격
-              </Label>
+              <Label htmlFor="price" className="text-right">가격</Label>
               <Input
                 id="price"
                 type="number"
@@ -107,9 +109,7 @@ export default function AdminProducts() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">
-                설명
-              </Label>
+              <Label htmlFor="description" className="text-right">설명</Label>
               <Textarea
                 id="description"
                 value={newProduct.description}
@@ -118,9 +118,7 @@ export default function AdminProducts() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="category" className="text-right">
-                카테고리
-              </Label>
+              <Label htmlFor="category" className="text-right">카테고리</Label>
               <Select
                 value={newProduct.category}
                 onValueChange={(value) => setNewProduct({ ...newProduct, category: value })}
@@ -172,9 +170,7 @@ export default function AdminProducts() {
                     {editingProduct && (
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="edit-name" className="text-right">
-                            이름
-                          </Label>
+                          <Label htmlFor="edit-name" className="text-right">이름</Label>
                           <Input
                             id="edit-name"
                             value={editingProduct.name}
@@ -183,9 +179,7 @@ export default function AdminProducts() {
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="edit-price" className="text-right">
-                            가격
-                          </Label>
+                          <Label htmlFor="edit-price" className="text-right">가격</Label>
                           <Input
                             id="edit-price"
                             type="number"
@@ -195,9 +189,7 @@ export default function AdminProducts() {
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="edit-description" className="text-right">
-                            설명
-                          </Label>
+                          <Label htmlFor="edit-description" className="text-right">설명</Label>
                           <Textarea
                             id="edit-description"
                             value={editingProduct.description}
@@ -206,9 +198,7 @@ export default function AdminProducts() {
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="edit-category" className="text-right">
-                            카테고리
-                          </Label>
+                          <Label htmlFor="edit-category" className="text-right">카테고리</Label>
                           <Select
                             value={editingProduct.category}
                             onValueChange={(value) => setEditingProduct({ ...editingProduct, category: value })}
