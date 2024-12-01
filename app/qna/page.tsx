@@ -12,18 +12,20 @@ type QnA = {
   question: string
   answer: string | null
   createdAt: string
+  fileName: string | null
 }
 
 export default function UserQnA() {
   const [qnas, setQnAs] = useState<QnA[]>([])
   const [newQuestion, setNewQuestion] = useState('')
+  const [file, setFile] = useState<File | null>(null)
   const { user } = useAuth()
   const router = useRouter()
 
   const fetchQnAs = useCallback(async () => {
-    // 실제 API 호출로 대체해야 합니다
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/qna/user/${user?.id}`)
     const data = await response.json()
+    console.log(data)
     setQnAs(data)
   }, [user?.id])
 
@@ -39,15 +41,36 @@ export default function UserQnA() {
     e.preventDefault()
     if (!user) return
 
-    // 실제 API 호출로 대체해야 합니다
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/qna`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, question: newQuestion })
-    })
+    if (!file) {
+      alert('파일을 선택해 주세요.')
+      return
+    }
 
-    setNewQuestion('')
-    fetchQnAs()
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('userId', user.id.toString())
+    formData.append('question', newQuestion)
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/qna`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Error:', errorData)
+        alert('질문 등록에 실패했습니다.')
+        return
+      }
+
+      setNewQuestion('')
+      setFile(null)
+      fetchQnAs()
+    } catch (error) {
+      console.error('질문 등록 오류:', error)
+      alert('질문 등록에 실패했습니다.')
+    }
   }
 
   if (!user) {
@@ -65,6 +88,12 @@ export default function UserQnA() {
           className="mb-4"
           required
         />
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          className="mb-4"
+          required
+        />
         <Button type="submit">질문 등록</Button>
       </form>
 
@@ -74,6 +103,7 @@ export default function UserQnA() {
             <TableHead>질문</TableHead>
             <TableHead>답변</TableHead>
             <TableHead>작성일</TableHead>
+            <TableHead>파일</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -82,6 +112,13 @@ export default function UserQnA() {
               <TableCell>{qna.question}</TableCell>
               <TableCell>{qna.answer || '답변 대기 중'}</TableCell>
               <TableCell>{new Date(qna.createdAt).toLocaleString()}</TableCell>
+              <TableCell>
+                {qna.fileName && (
+                  <a href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${qna.fileName}`} target="_blank" rel="noopener noreferrer">
+                    파일 다운로드
+                  </a>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
