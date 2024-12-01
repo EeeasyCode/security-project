@@ -20,6 +20,7 @@ type Product = {
 export default function CategoryPage() {
   const params = useParams()
   const [products, setProducts] = useState<Product[]>([])
+  const [categoryProducts, setCategoryProducts] = useState<Product[]>([])
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -38,9 +39,12 @@ export default function CategoryPage() {
     fetchProducts()
   }, [])
 
-  const categoryProducts = products.filter(
-    product => product.category.toLowerCase() === params.category
-  )
+  useEffect(() => {
+    const filteredProducts = products.filter(
+      product => product.category.toLowerCase() === (params.category as string).toLowerCase()
+    )
+    setCategoryProducts(filteredProducts)
+  }, [products, params.category])
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">

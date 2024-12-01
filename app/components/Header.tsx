@@ -34,16 +34,16 @@ export default function Header() {
               <Link href="/" className="hover:text-primary">
                 All
               </Link>
-              <Link href="/?category=Top" className="hover:text-primary">
+              <Link href="/category/Top" className="hover:text-primary">
                 Top
               </Link>
-              <Link href="/?category=Bottom" className="hover:text-primary">
+              <Link href="/category/Bottom" className="hover:text-primary">
                 Bottom
               </Link>
-              <Link href="/?category=Jacket" className="hover:text-primary">
+              <Link href="/category/Jacket" className="hover:text-primary">
                 Jacket
               </Link>
-              <Link href="/?category=ACC" className="hover:text-primary">
+              <Link href="/category/ACC" className="hover:text-primary">
                 ACC
               </Link>
             </nav>
@@ -76,6 +76,9 @@ export default function Header() {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/my-reviews">내 리뷰 히스토리</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/qna">QnA</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleLogout}>
                       로그아웃
