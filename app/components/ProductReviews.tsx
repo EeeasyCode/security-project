@@ -108,7 +108,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
                       />
                     ))}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">{review.comment}</p>
+                  <p className="text-sm text-muted-foreground mt-1" dangerouslySetInnerHTML={{ __html: review.comment }}></p>
                   {review.isPrivate && (
                     <span className="text-xs text-muted-foreground mt-1 block">비공개 리뷰</span>
                   )}
