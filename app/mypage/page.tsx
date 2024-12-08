@@ -26,7 +26,9 @@ export default function MyPage() {
           <CardContent>
             <p className="mb-2">이름: {user.name}</p>
             <p className="mb-4">이메일: {user.email}</p>
-            <Button variant="outline">정보 수정</Button>
+            <Link href="/edit-profile">
+              <Button variant="outline">정보 수정</Button>
+            </Link>
           </CardContent>
         </Card>
 
