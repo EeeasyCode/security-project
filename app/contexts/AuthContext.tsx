@@ -21,6 +21,7 @@ type AuthContextType = {
   ) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
+  isLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,20 +30,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // 초기 로딩 상태
 
   useEffect(() => {
-    // Check for existing user data in localStorage on initial load
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      if (!parsedUser.role) {
-        parsedUser.role = parsedUser.email === "admin@admin.com" ? "admin" : "user";
-      }
-      setUser(parsedUser);
+      setUser(JSON.parse(storedUser));
     }
+    setIsLoading(false); // 로딩 완료
   }, []);
 
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    address: string
+  ) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, address }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Registration failed");
+      }
+  
+      const userData = await response.json();
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+
   const login = async (email: string, password: string) => {
+    setIsLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
         method: "POST",
@@ -55,50 +84,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const userData = await response.json();
-
-      if (userData.email === "admin@admin.com") {
-        userData.role = "admin";
-      } else {
-        userData.role = "user";
-      }
+      userData.role = userData.email === "admin@admin.com" ? "admin" : "user";
 
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
     } catch (error) {
       console.error("Login error:", error);
       throw error;
-    }
-  };
-
-  const register = async (
-    name: string,
-    email: string,
-    password: string,
-    address: string
-  ) => {
-    try {
-      if (!process.env.NEXT_PUBLIC_API_URL) {
-        throw new Error("API URL is not defined");
-      }
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password, address }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Registration failed");
-      }
-
-      const userData = await response.json();
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-    } catch (error) {
-      console.error("Registration error:", error);
-      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -116,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

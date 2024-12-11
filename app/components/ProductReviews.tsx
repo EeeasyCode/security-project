@@ -35,7 +35,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
       return
     }
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews?productId=${productId}&userId=${user.id}`)
+      console.log(user)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews?productId=${productId}&userId=${user[0].id}`)
       if (response.ok) {
         const data = await response.json()
         setReviews(data.reviews)
@@ -62,8 +63,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId,
-          userId: user.id,
-          userName: user.name,
+          userId: user[0].id,
+          userName: user[0].name,
           rating: newReview.rating,
           comment: newReview.comment,
           isPrivate: newReview.isPrivate

@@ -1,32 +1,37 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/app/contexts/AuthContext'
-import Link from 'next/link'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Package, ShoppingCart, Users, MessageSquare } from 'lucide-react'
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/contexts/AuthContext';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Package, ShoppingCart, Users, MessageSquare } from 'lucide-react';
 
 export default function AdminDashboard() {
-    const { user, isLoading } = useAuth()
-    const router = useRouter()
-  
-    useEffect(() => {
-      // 로딩 중이 아닐 때만 리다이렉트 로직 실행
-      if (!isLoading) {
-        if (user && user.role !== 'admin') {
-          router.push('/')
-        } else if (!user) {
-          router.push('/login')
-        }
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        console.log('Redirecting to login...');
+        router.push('/login'); // 로그인이 필요한 경우 로그인 페이지로 이동
+      } else if (user[0].role !== 'admin') {
+        console.log(user[0].role)
+        console.log('Redirecting to home...');
+        router.push('/'); // 관리자가 아닌 경우 홈으로 이동
       }
-    }, [user, router, isLoading])
-  
-    // 로딩 중이거나 admin이 아닌 경우 null 반환
-    if (isLoading || !user || user.role !== 'admin') {
-      return <div>Loading...</div>
     }
+  }, [user, isLoading, router]);
+
+  if (isLoading) {
+    return <div>Loading...</div>; // 로딩 중일 때 로딩 메시지 표시
+  }
+
+  if (!user || user[0].role !== 'admin') {
+    return null; // 사용자 권한이 없는 경우 아무것도 렌더링하지 않음
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -82,5 +87,5 @@ export default function AdminDashboard() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

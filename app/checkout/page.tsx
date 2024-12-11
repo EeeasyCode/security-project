@@ -24,13 +24,13 @@ export default function CheckoutPage() {
       router.push('/login')
       return
     }
-
+    console.log(user[0].id)
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/purchases`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: user.id,
+          userId: user[0].id,
           items: items,
           total: total,
           address: address,

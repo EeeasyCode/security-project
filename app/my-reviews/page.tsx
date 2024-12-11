@@ -23,7 +23,7 @@ export default function MyReviews() {
     const fetchReviews = async () => {
       if (!user) return
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/user/${user.id}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/user/${user[0].id}`)
         if (response.ok) {
           const data = await response.json()
           console.log(data)

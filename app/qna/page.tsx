@@ -23,7 +23,7 @@ export default function UserQnA() {
   const router = useRouter()
 
   const fetchQnAs = useCallback(async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/qna/user/${user?.id}`)
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/qna/user/${user[0]?.id}`)
     const data = await response.json()
     console.log(data)
     setQnAs(data)
@@ -48,7 +48,7 @@ export default function UserQnA() {
 
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('userId', user.id.toString())
+    formData.append('userId', user[0].id.toString())
     formData.append('question', newQuestion)
 
     try {

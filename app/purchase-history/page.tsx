@@ -43,7 +43,7 @@ export default function PurchaseHistoryPage() {
       if (!user) return
       
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/purchases/history?userId=${user.id}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/purchases/history?userId=${user[0].id}`)
         if (response.ok) {
           const data = await response.json()
           setPurchases(data)

@@ -52,7 +52,7 @@ export default function WriteReviewPage() {
     const checkExistingReview = async () => {
       if (!user || !productId) return
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/check?userId=${user.id}&productId=${productId}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews/check?userId=${user[0].id}&productId=${productId}`)
         if (response.ok) {
           const { hasReview } = await response.json()
           if (hasReview) {
@@ -78,8 +78,8 @@ export default function WriteReviewPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: product.id,
-          userId: user.id,
-          userName: user.name,
+          userId: user[0].id,
+          userName: user[0].name,
           rating,
           comment,
           isPrivate

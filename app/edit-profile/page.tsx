@@ -33,7 +33,7 @@ export default function EditProfilePage() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user[0].id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

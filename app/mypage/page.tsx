@@ -24,8 +24,8 @@ export default function MyPage() {
             <CardDescription>회원 정보를 확인하고 수정할 수 있습니다.</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="mb-2">이름: {user.name}</p>
-            <p className="mb-4">이메일: {user.email}</p>
+            <p className="mb-2">이름: {user[0].name}</p>
+            <p className="mb-4">이메일: {user[0].email}</p>
             <Link href="/edit-profile">
               <Button variant="outline">정보 수정</Button>
             </Link>
