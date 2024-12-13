@@ -103,12 +103,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const updateUser = (userData: Partial<User>) => {
     if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      // 불필요한 필드 제거
+      const sanitizedUser = { ...user };
+      delete sanitizedUser[0]; // `0` 키 제거
+  
+      // 병합 및 업데이트
+      const updatedUser = { ...sanitizedUser, ...userData };
+      console.log("최종 병합 결과:", updatedUser);
+  
+      setUser([updatedUser]);
+      localStorage.setItem("user", JSON.stringify([updatedUser]));
     }
   };
-
+    
   return (
     <AuthContext.Provider value={{ user, login, register, logout, updateUser, isLoading }}>
       {children}
